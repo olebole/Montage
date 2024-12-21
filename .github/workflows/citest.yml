@@ -1,0 +1,41 @@
+
+name: Montage CI test
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    env:
+      CFLAGS: ${{ matrix.cflags }}
+      CC: ${{ matrix.cc }}
+
+    strategy:
+      matrix:
+        include:
+          - name: Ubuntu latest x86_64
+            os: ubuntu-latest
+            cflags: -O2 -g -Wall
+            cc: gcc
+
+          - name: macOS arm64
+            os: macos-14
+            cflags: -O2 -g -Wall
+            cc: clang
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup dependencies on Ubuntu
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y build-essential
+
+
+      - name: Build
+        run: |
+          make
+
